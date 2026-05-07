@@ -24,7 +24,14 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.json import json_dumps
 
 from . import NanobotConfigEntry
-from .const import DOMAIN, LOGGER
+from .const import (
+    CONF_MAX_TOKENS,
+    CONF_MODEL,
+    CONF_TEMPERATURE,
+    CONF_TOP_P,
+    DOMAIN,
+    LOGGER,
+)
 
 MAX_TOOL_ITERATIONS = 10
 
@@ -162,7 +169,8 @@ class NanobotConversationEntity(conversation.ConversationEntity):
 
         # --- Step 2: Prepare the OpenAI client and session ---
         client = self.entry.runtime_data
-        model = self.entry.data.get("model", "") or None
+        options = self.entry.options
+        model = options.get(CONF_MODEL) or self.entry.data.get("model", "") or None
         conversation_id = user_input.conversation_id or user_input.agent_id
 
         # --- Step 3: Build single user message ---
@@ -203,6 +211,12 @@ class NanobotConversationEntity(conversation.ConversationEntity):
                     "session_id": f"ha_{conversation_id}_{self.entry.entry_id}",
                 },
             }
+            if max_tokens := options.get(CONF_MAX_TOKENS):
+                api_kwargs["max_tokens"] = max_tokens
+            if temperature := options.get(CONF_TEMPERATURE):
+                api_kwargs["temperature"] = temperature
+            if top_p := options.get(CONF_TOP_P):
+                api_kwargs["top_p"] = top_p
             if tools:
                 api_kwargs["tools"] = tools
             try:

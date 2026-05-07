@@ -12,12 +12,18 @@ from homeassistant.helpers.httpx_client import get_async_client
 
 from .const import (
     CONF_API_URL,
+    CONF_MAX_TOKENS,
     CONF_MODEL,
-    CONF_RECOMMENDED,
+    CONF_TEMPERATURE,
+    CONF_TOP_P,
     DEFAULT_API_URL,
+    DEFAULT_MAX_TOKENS,
     DEFAULT_MODEL,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_TOP_P,
     DOMAIN,
     LOGGER,
+    MAX_TOKENS_UPPER_BOUND,
     RECOMMENDED_CONVERSATION_OPTIONS,
 )
 
@@ -114,10 +120,6 @@ class NanobotOptionsFlow(OptionsFlow):
     ) -> ConfigFlowResult:
         """Manage the options."""
         if user_input is not None:
-            if user_input.get(CONF_RECOMMENDED):
-                return self.async_create_entry(
-                    title="", data=RECOMMENDED_CONVERSATION_OPTIONS
-                )
             return self.async_create_entry(title="", data=user_input)
 
         options = self.config_entry.options or RECOMMENDED_CONVERSATION_OPTIONS
@@ -125,12 +127,13 @@ class NanobotOptionsFlow(OptionsFlow):
         schema = vol.Schema(
             {
                 vol.Optional(
-                    CONF_RECOMMENDED,
-                    default=options.get(CONF_RECOMMENDED, True),
-                ): bool,
+                    CONF_MODEL,
+                    default=options.get(CONF_MODEL, DEFAULT_MODEL),
+                    description={"suggested_value": options.get(CONF_MODEL, DEFAULT_MODEL)},
+                ): str,
                 vol.Optional(
                     CONF_LLM_HASS_API,
-                    default=options.get(CONF_LLM_HASS_API, llm.LLM_API_ASSIST),
+                    default=options.get(CONF_LLM_HASS_API, [llm.LLM_API_ASSIST]),
                 ): selector.SelectSelector(
                     selector.SelectSelectorConfig(
                         options=[
@@ -153,6 +156,39 @@ class NanobotOptionsFlow(OptionsFlow):
                     selector.TextSelectorConfig(
                         multiline=True,
                         type=selector.TextSelectorType.TEMPLATE,
+                    ),
+                ),
+                vol.Optional(
+                    CONF_MAX_TOKENS,
+                    default=options.get(CONF_MAX_TOKENS, DEFAULT_MAX_TOKENS),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=1,
+                        max=MAX_TOKENS_UPPER_BOUND,
+                        mode="box",
+                        step=1,
+                    ),
+                ),
+                vol.Optional(
+                    CONF_TEMPERATURE,
+                    default=options.get(CONF_TEMPERATURE, DEFAULT_TEMPERATURE),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=2,
+                        step=0.05,
+                        mode="slider",
+                    ),
+                ),
+                vol.Optional(
+                    CONF_TOP_P,
+                    default=options.get(CONF_TOP_P, DEFAULT_TOP_P),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=1,
+                        step=0.05,
+                        mode="slider",
                     ),
                 ),
             }
