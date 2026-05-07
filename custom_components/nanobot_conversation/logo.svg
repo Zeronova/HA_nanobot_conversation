@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="248" fill="url(#bg)"/>
+  <!-- Ears -->
+  <polygon points="156,140 130,60 210,120" fill="#312e81"/>
+  <polygon points="356,140 382,60 302,120" fill="#312e81"/>
+  <!-- Inner ears -->
+  <polygon points="156,135 138,80 200,120" fill="#f472b6"/>
+  <polygon points="356,135 374,80 312,120" fill="#f472b6"/>
+  <!-- Head -->
+  <ellipse cx="256" cy="260" rx="120" ry="105" fill="#1e1b4b"/>
+  <!-- Eyes -->
+  <ellipse cx="208" cy="245" rx="22" ry="25" fill="#fefce8"/>
+  <ellipse cx="304" cy="245" rx="22" ry="25" fill="#fefce8"/>
+  <!-- Pupils -->
+  <ellipse cx="208" cy="245" rx="10" ry="20" fill="#312e81"/>
+  <ellipse cx="304" cy="245" rx="10" ry="20" fill="#312e81"/>
+  <!-- Eye glow (AI/tech touch) -->
+  <circle cx="214" cy="238" r="4" fill="#c7d2fe" opacity="0.8"/>
+  <circle cx="310" cy="238" r="4" fill="#c7d2fe" opacity="0.8"/>
+  <!-- Nose -->
+  <polygon points="256,275 246,290 266,290" fill="#f472b6"/>
+  <!-- Mouth -->
+  <path d="M236 295 Q256 310 276 295" fill="none" stroke="#fefce8" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Whiskers left -->
+  <line x1="110" y1="258" x2="182" y2="270" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="105" y1="278" x2="180" y2="280" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="112" y1="298" x2="182" y2="290" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <!-- Whiskers right -->
+  <line x1="402" y1="258" x2="330" y2="270" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="407" y1="278" x2="332" y2="280" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="400" y1="298" x2="330" y2="290" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <!-- Circuit traces (nanobot tech touch) -->
+  <path d="M80 200 L120 200 L130 210 L130 230 L140 230" fill="none" stroke="#a5b4fc" stroke-width="2" opacity="0.5"/>
+  <circle cx="80" cy="200" r="4" fill="#a5b4fc" opacity="0.5"/>
+  <circle cx="140" cy="230" r="3" fill="#a5b4fc" opacity="0.5"/>
+  <path d="M432 360 L392 360 L382 350 L382 330 L370 330" fill="none" stroke="#a5b4fc" stroke-width="2" opacity="0.5"/>
+  <circle cx="432" cy="360" r="4" fill="#a5b4fc" opacity="0.5"/>
+  <circle cx="370" cy="330" r="3" fill="#a5b4fc" opacity="0.5"/>
+  <!-- Nanobot text -->
+  <text x="256" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="bold" fill="#fefce8" text-anchor="middle" letter-spacing="2">NANOBOT</text>
+</svg>
