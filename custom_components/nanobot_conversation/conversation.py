@@ -19,6 +19,7 @@ from homeassistant.const import CONF_LLM_HASS_API, CONF_PROMPT, MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr, llm
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.json import json_dumps
 
@@ -159,33 +160,47 @@ class NanobotConversationEntity(conversation.ConversationEntity):
         except conversation.ConverseError as err:
             return err.as_conversation_result()
 
-        # --- Step 2: Prepare the OpenAI client ---
+        # --- Step 2: Prepare the OpenAI client and session ---
         client = self.entry.runtime_data
-
-        # Determine the model
         model = self.entry.data.get("model", "") or None
+        conversation_id = user_input.conversation_id or user_input.agent_id
 
-        # --- Step 3: Tool-calling loop ---
-        for _iteration in range(MAX_TOOL_ITERATIONS):
-            # Build messages from chat_log content
-            messages: list[ChatCompletionMessageParam] = [
-                m
-                for content in chat_log.content
-                if (m := _chat_message_from_content(content))
+        # --- Step 3: Build single user message ---
+        # nanobot serve only accepts a single user message (no system/assistant/tool roles)
+        system_parts: list[str] = []
+        user_parts: list[str] = []
+        for content in chat_log.content:
+            if isinstance(content, conversation.SystemContent):
+                system_parts.append(content.content)
+            elif isinstance(content, conversation.UserContent):
+                user_parts.append(content.content)
+
+        combined = ""
+        if system_parts:
+            combined = "\n\n".join(system_parts) + "\n\n"
+        combined += "\n\n".join(user_parts)
+
+        messages: list[ChatCompletionMessageParam] = [
+            {"role": "user", "content": combined}
+        ]
+
+        # Build tools from llm_api
+        tools: list[dict[str, Any]] | None = None
+        if chat_log.llm_api and chat_log.llm_api.tools:
+            tools = [
+                _format_tool(t, chat_log.llm_api.custom_serializer)
+                for t in chat_log.llm_api.tools
             ]
 
-            # Build tools from llm_api
-            tools: list[dict[str, Any]] | None = None
-            if chat_log.llm_api and chat_log.llm_api.tools:
-                tools = [
-                    _format_tool(t, chat_log.llm_api.custom_serializer)
-                    for t in chat_log.llm_api.tools
-                ]
-
+        # --- Step 4: Tool-calling loop ---
+        for _iteration in range(MAX_TOOL_ITERATIONS):
             # Make the API call
             api_kwargs: dict[str, Any] = {
                 "model": model or None,
                 "messages": messages,
+                "extra_body": {
+                    "session_id": f"ha_{conversation_id}_{self.entry.entry_id}",
+                },
             }
             if tools:
                 api_kwargs["tools"] = tools
@@ -206,7 +221,7 @@ class NanobotConversationEntity(conversation.ConversationEntity):
             # Build the delta dict for the chat_log stream
             delta: conversation.AssistantContentDeltaDict = {
                 "role": "assistant",
-                "content": msg.content,
+                "content": msg.content or "",
             }
 
             if msg.tool_calls:
@@ -231,7 +246,24 @@ class NanobotConversationEntity(conversation.ConversationEntity):
             if not chat_log.unresponded_tool_results:
                 break
 
-        # --- Step 4: Return the result ---
+            # Build a follow-up single user message with tool results
+            # (nanobot serve can't handle multiple messages with tool roles)
+            tool_summaries: list[str] = []
+            for unresponded in chat_log.unresponded_tool_results:
+                result_text = json_dumps(unresponded.tool_result)
+                tool_summaries.append(
+                    f"Tool result ({unresponded.tool_call_id}): {result_text}"
+                )
+
+            follow_up = (
+                f"{combined}\n\n"
+                f"Assistant called the following tools:\n"
+                f"{chr(10).join(tool_summaries)}\n\n"
+                f"Given the tool results above, provide your final response to the user in German."
+            )
+            messages = [{"role": "user", "content": follow_up}]
+
+        # --- Step 5: Return the result ---
         return conversation.async_get_result_from_chat_log(user_input, chat_log)
 
 
