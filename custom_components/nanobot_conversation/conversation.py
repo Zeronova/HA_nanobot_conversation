@@ -169,7 +169,7 @@ class NanobotConversationEntity(conversation.ConversationEntity):
         # --- Step 2: Prepare the OpenAI client and session ---
         client = self.entry.runtime_data
         options = self.entry.options
-        model = options.get(CONF_MODEL) or self.entry.data.get("model", "") or None
+        model = options.get(CONF_MODEL) or None
         conversation_id = user_input.conversation_id or user_input.agent_id
 
         # --- Step 3: Build single user message ---

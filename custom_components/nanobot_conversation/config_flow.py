@@ -31,7 +31,6 @@ from .const import (
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_API_URL, default=DEFAULT_API_URL): str,
-        vol.Optional(CONF_MODEL, default=DEFAULT_MODEL): str,
         vol.Optional(CONF_API_KEY, default=""): str,
     }
 )
@@ -99,7 +98,6 @@ class NanobotConversationConfigFlow(ConfigFlow, domain=DOMAIN):
             data={
                 CONF_API_URL: user_input[CONF_API_URL],
                 CONF_API_KEY: user_input.get(CONF_API_KEY, ""),
-                CONF_MODEL: user_input.get(CONF_MODEL, DEFAULT_MODEL),
             },
         )
 
