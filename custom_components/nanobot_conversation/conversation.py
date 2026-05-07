@@ -19,7 +19,6 @@ from homeassistant.const import CONF_LLM_HASS_API, CONF_PROMPT, MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr, llm
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.json import json_dumps
 
@@ -109,7 +108,7 @@ def _decode_tool_arguments(arguments: str) -> Any:
         raise HomeAssistantError(f"Invalid tool argument JSON: {err}") from err
 
 
-class NanobotConversationEntity(Entity, conversation.ConversationEntity):
+class NanobotConversationEntity(conversation.ConversationEntity):
     """Conversation entity that talks to the nanobot API."""
 
     _attr_has_entity_name = True
